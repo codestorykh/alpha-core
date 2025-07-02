@@ -1,0 +1,48 @@
+services:
+  # Postgres
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    environment:
+      POSTGRES_USER: codestorykh
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: alpha_core
+    ports:
+      - "5432:5432"
+    networks:
+      - alpha_core
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+  # pgAdmin
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin
+    depends_on:
+      - postgres
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+    ports:
+      - "5050:80"
+    networks:
+      - alpha_core
+  # Redis
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - alpha_core
+    volumes:
+      - redis_data:/data
+
+####
+networks:
+  alpha_core:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:

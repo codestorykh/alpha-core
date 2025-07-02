@@ -1,0 +1,109 @@
+logging:
+  level:
+    org.springframework.security: DEBUG
+    com.alpha.oauth2: DEBUG
+    com.zaxxer.hikari: DEBUG
+    com.codestorykh.alpha.cache: DEBUG
+    com.codestorykh.alpha.config: DEBUG
+    com.codestorykh.alpha.security: DEBUG
+    com.codestorykh.alpha.auth: DEBUG
+    io.jsonwebtoken: DEBUG
+    com.codestorykh.alpha.config.com.codestorykh.alpha.config.JwtConfigurationProperties: DEBUG
+    com.codestorykh.alpha.config.JwtConfigurationValidator: DEBUG
+    com.codestorykh.alpha.security.service.JwtService: DEBUG
+server:
+  port: 8080
+  # servlet:
+  #   context-path: /oauth2
+spring:
+  profiles:
+    active: dev
+  application:
+    name: alpha-oauth2
+  web:
+    resources:
+      add-mappings: false
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/alpha_core
+    username: ${DB_USERNAME:codestorykh}
+    password: ${DB_PASSWORD:password}
+    hikari:
+      pool-name: AlphaOAuth2HikariPool
+      minimum-idle: 5
+      maximum-pool-size: 20
+      idle-timeout: 300000
+      connection-timeout: 20000
+      max-lifetime: 1200000
+      auto-commit: true
+      connection-test-query: SELECT 1
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        connection:
+          provider_disables_autocommit: false
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      database: ${REDIS_DATABASE:0}
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: -1ms
+  cache:
+    type: redis
+    redis:
+      time-to-live: 30m
+      cache-null-values: false
+      use-key-prefix: true
+      key-prefix: "alpha-core:"
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080
+          jwk-set-uri: http://localhost:8080/.well-known/jwks.json
+
+# JWT Configuration
+# This will be used as fallback if database configuration is not available
+jwt:
+  # Core JWT settings
+  secret: ${JWT_SECRET:5367566B59703373367639792F423F4528482B4D6251655468576D5A71347437}
+  expiration: ${JWT_EXPIRATION:3600000}
+  refresh-expiration: ${JWT_REFRESH_EXPIRATION:86400000}
+  issuer: ${JWT_ISSUER:alpha-identity-server}
+  audience: ${JWT_AUDIENCE:alpha-clients}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+    metrics:
+      enabled: true
+    prometheus:
+      enabled: true
+  health:
+    livenessState:
+      enabled: true
+    readinessState:
+      enabled: true
+    redis:
+      enabled: true
+    jwt:
+      enabled: true
